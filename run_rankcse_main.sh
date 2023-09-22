@@ -7,9 +7,9 @@ XDG_CACHE_HOME=$SCRATCH/.cache \
 TRANSFORMERS_OFFLINE=1 \
 HF_DATASETS_OFFLINE=1 \
 python train.py \
-    --model_name_or_path sentence-transformers/distilbert-base-nli-stsb-mean-tokens \
+    --model_name_or_path bert-base-uncased \
     --train_file data/wiki1m_for_simcse.txt \
-    --output_dir runs/scratch-listmle-distilbert-base-nli-stsb-mean-tokens \
+    --output_dir runs/scratch-listmle-bert-base-uncased \
     --num_train_epochs 1 \
     --per_device_train_batch_size 128 \
     --learning_rate 3e-5 \
@@ -18,7 +18,7 @@ python train.py \
     --metric_for_best_model stsb_spearman \
     --load_best_model_at_end \
     --eval_steps 125 \
-    --pooler_type avg \
+    --pooler_type cls \
     --mlp_only_train \
     --overwrite_output_dir \
     --temp 0.05 \
@@ -26,7 +26,7 @@ python train.py \
     --do_eval \
     --fp16 \
     --first_teacher_name_or_path voidism/diffcse-bert-base-uncased-sts \
-    --second_teacher_name_or_path sosuke/ease-bert-base-uncased \
+    --second_teacher_name_or_path princeton-nlp/unsup-simcse-bert-large-uncased \
     --distillation_loss listmle \
     --alpha_ 0.33 \
     --beta_ 1.0 \

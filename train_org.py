@@ -12,7 +12,6 @@ from datasets import load_dataset
 
 import transformers
 from transformers import (
-    DistilBertForMaskedLM,
     CONFIG_MAPPING,
     MODEL_FOR_MASKED_LM_MAPPING,
     AutoConfig,
@@ -35,7 +34,7 @@ from transformers.tokenization_utils_base import BatchEncoding, PaddingStrategy,
 from transformers.trainer_utils import is_main_process
 from transformers.data.data_collator import DataCollatorForLanguageModeling
 from transformers.file_utils import cached_property, torch_required, is_torch_available, is_torch_tpu_available
-from rankcse.models import RobertaForCL, BertForCL, DistilBertForCL
+from rankcse.models import RobertaForCL, BertForCL
 from rankcse.trainers import CLTrainer
 
 logger = logging.getLogger(__name__)
@@ -418,20 +417,6 @@ def main():
             if model_args.do_mlm:
                 pretrained_model = BertForPreTraining.from_pretrained(model_args.model_name_or_path)
                 model.lm_head.load_state_dict(pretrained_model.cls.predictions.state_dict())
-        elif 'distilbert' in model_args.model_name_or_path:
-            model = DistilBertForCL.from_pretrained(
-                model_args.model_name_or_path,
-                from_tf=bool(".ckpt" in model_args.model_name_or_path),
-                config=config,
-                cache_dir=model_args.cache_dir,
-                revision=model_args.model_revision,
-                use_auth_token=True if model_args.use_auth_token else None,
-                model_args=model_args
-            )
-            if model_args.do_mlm:
-                pretrained_model = DistilBertForMaskedLM.from_pretrained(model_args.model_name_or_path)
-                #model.lm_head.load_state_dict(pretrained_model.cls.predictions.state_dict())
-                model.lm_head.load_state_dict(pretrained_model.distilbert.embeddings.word_embeddings.state_dict())
         else:
             raise NotImplementedError
     else:
@@ -627,9 +612,6 @@ def main():
             # Need to save the state, since Trainer.save_model saves only the tokenizer with the model
             trainer.state.save_to_json(os.path.join(training_args.output_dir, "trainer_state.json"))
 
-    from save_model import save_just_model
-    path = save_just_model(model = model)
-    print(path)
     # Evaluation
     results = {}
     if training_args.do_eval:
